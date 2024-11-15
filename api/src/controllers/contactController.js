@@ -1,19 +1,19 @@
 import { Contact } from '../../model/contact.model.js';
 
 class ContactController {
-
-
     async createContact(req, res) {
         try {
-            const { name, email, phone } = req.body;
+            const { firstName, lastName, email, phone, company, jobTitle } = req.body;
 
             // Validate required fields
-            if (!name || !email || !phone) {
-                return res.status(400).json({ message: 'Name, email, and phone are required.' });
+            if (!firstName || !lastName || !email || !phone) {
+                return res.status(400).json({
+                    message: 'First name, last name, email, and phone are required.'
+                });
             }
 
             // Create and save the new contact
-            let newContact = new Contact({ name, email, phone });
+            let newContact = new Contact({ firstName, lastName, email, phone, company, jobTitle });
             newContact = await newContact.save();
 
             res.status(201).json(newContact);
@@ -42,17 +42,19 @@ class ContactController {
 
     async updateContact(req, res) {
         const { id } = req.params;
-        const { name, email, phone } = req.body;
+        const { firstName, lastName, email, phone, company, jobTitle } = req.body;
 
         try {
             // Validate required fields
-            if (!name || !email || !phone) {
-                return res.status(400).json({ message: 'Name, email, and phone are required.' });
+            if (!firstName || !lastName || !email || !phone) {
+                return res.status(400).json({
+                    message: 'First name, last name, email, and phone are required.'
+                });
             }
 
             const updatedContact = await Contact.findByIdAndUpdate(
                 id,
-                { name, email, phone },
+                { firstName, lastName, email, phone, company, jobTitle },
                 { new: true, runValidators: true }
             );
 
