@@ -11,25 +11,28 @@ import {
 } from '@mui/material';
 
 const ContactForm = ({ 
-    isOpen, 
-    onClose, 
-    onSubmit, 
-    initialData = {}, 
-    title 
+    isOpen,               // Boolean to control whether the dialog is open or not
+    onClose,              // Callback to handle closing the dialog
+    onSubmit,             // Callback to handle form submission
+    initialData = {},     // Initial data for editing an existing contact
+    title                // Title for the dialog (Add or Edit)
 }) => {
-    const [formErrors, setFormErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState({});  // State to store validation errors
+    const [isSubmitting, setIsSubmitting] = useState(false);  // State to manage submission status
 
+    // Form validation function to check for required fields and email format
     const validateForm = useCallback((data) => {
         const errors = {};
         const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'company', 'jobTitle'];
         
         requiredFields.forEach(field => {
+            // Check if the required field is empty
             if (!data[field]?.trim()) {
                 errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
             }
         });
 
+        // Check if the email format is valid
         if (data.email && !/\S+@\S+\.\S+/.test(data.email)) {
             errors.email = 'Invalid email format';
         }
@@ -37,28 +40,29 @@ const ContactForm = ({
         return errors;
     }, []);
 
+    // Handle form submission
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
+        setIsSubmitting(true);  // Set submitting state to true
 
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
+        const formData = new FormData(e.target);  // Get form data
+        const data = Object.fromEntries(formData.entries());  // Convert form data to an object
 
-        const errors = validateForm(data);
+        const errors = validateForm(data);  // Validate the form data
         if (Object.keys(errors).length > 0) {
-            setFormErrors(errors);
-            setIsSubmitting(false);
+            setFormErrors(errors);  // Set form errors if validation fails
+            setIsSubmitting(false);  // Reset submitting state
             return;
         }
 
         try {
-            await onSubmit(data);
-            setFormErrors({});
-            onClose();
+            await onSubmit(data);  // Submit the form data
+            setFormErrors({});  // Clear any previous errors
+            onClose();  // Close the dialog
         } catch (error) {
-            // Form-level errors are handled by the parent component
+            // Error handling can be done here
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false);  // Reset submitting state once the form is handled
         }
     }, [onSubmit, onClose, validateForm]);
 
@@ -67,7 +71,9 @@ const ContactForm = ({
             <form onSubmit={handleSubmit}>
                 <DialogTitle>{title}</DialogTitle>
                 <DialogContent>
+                    {/* Form Fields */}
                     <Grid container spacing={2} sx={{ mt: 1 }}>
+                        {/* First Name */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
@@ -76,11 +82,12 @@ const ContactForm = ({
                                 label="First Name"
                                 fullWidth
                                 defaultValue={initialData?.firstName}
-                                error={!!formErrors.firstName}
-                                helperText={formErrors.firstName}
-                                disabled={isSubmitting}
+                                error={!!formErrors.firstName}  // Show error if validation fails
+                                helperText={formErrors.firstName}  // Display error message
+                                disabled={isSubmitting}  // Disable field during submission
                             />
                         </Grid>
+                        {/* Last Name */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
@@ -94,6 +101,7 @@ const ContactForm = ({
                                 disabled={isSubmitting}
                             />
                         </Grid>
+                        {/* Email */}
                         <Grid item xs={12}>
                             <TextField
                                 required
@@ -108,6 +116,7 @@ const ContactForm = ({
                                 disabled={isSubmitting}
                             />
                         </Grid>
+                        {/* Phone */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
@@ -121,6 +130,7 @@ const ContactForm = ({
                                 disabled={isSubmitting}
                             />
                         </Grid>
+                        {/* Company */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
@@ -134,6 +144,7 @@ const ContactForm = ({
                                 disabled={isSubmitting}
                             />
                         </Grid>
+                        {/* Job Title */}
                         <Grid item xs={12}>
                             <TextField
                                 required
@@ -149,20 +160,23 @@ const ContactForm = ({
                         </Grid>
                     </Grid>
                 </DialogContent>
+                {/* Dialog Actions */}
                 <DialogActions>
+                    {/* Cancel Button */}
                     <Button 
                         onClick={onClose} 
-                        disabled={isSubmitting}
+                        disabled={isSubmitting}  // Disable the button during submission
                     >
                         Cancel
                     </Button>
+                    {/* Submit Button */}
                     <Button
                         type="submit"
                         variant="contained"
-                        disabled={isSubmitting}
-                        startIcon={isSubmitting && <CircularProgress size={20} />}
+                        disabled={isSubmitting}  // Disable the button during submission
+                        startIcon={isSubmitting && <CircularProgress size={20} />}  // Show progress spinner when submitting
                     >
-                        {isSubmitting ? 'Saving...' : 'Save'}
+                        {isSubmitting ? 'Saving...' : 'Save'}  // Change text when submitting
                     </Button>
                 </DialogActions>
             </form>

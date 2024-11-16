@@ -10,7 +10,6 @@ import {
     IconButton,
     CircularProgress,
     Typography,
-    
     Paper,
     TextField,
     InputAdornment,
@@ -30,42 +29,51 @@ const ContactsTable = ({
     isAddDialogOpen,
     onAddDialogClose 
 }) => {
+    // State variables for pagination, contact editing, and search functionality
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [editContact, setEditContact] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+    // Callback to handle page change in pagination
     const handleChangePage = useCallback((_, newPage) => {
         setPage(newPage);
     }, []);
 
+    // Callback to handle rows per page change in pagination
     const handleChangeRowsPerPage = useCallback((event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
+        setRowsPerPage(parseInt(event.target.value, 10)); // Set new rows per page
+        setPage(0); // Reset to first page
     }, []);
 
+    // Callback to set the contact for editing when the edit button is clicked
     const handleEditClick = useCallback((contact) => {
         setEditContact(contact);
     }, []);
 
+    // Close the edit modal when the "close" button is clicked
     const handleCloseEdit = useCallback(() => {
         setEditContact(null);
     }, []);
 
+    // Callback to update the search query and reset to the first page when changed
     const handleSearchChange = useCallback((event) => {
         setSearchQuery(event.target.value);
         setPage(0);
     }, []);
 
+    // Show a snackbar message (either success or error)
     const showSnackbar = useCallback((message, severity = 'success') => {
         setSnackbar({ open: true, message, severity });
     }, []);
 
+    // Close the snackbar when clicked
     const handleCloseSnackbar = useCallback(() => {
         setSnackbar(prev => ({ ...prev, open: false }));
     }, []);
 
+    // Memoize the filtered contacts based on the search query
     const filteredContacts = useMemo(() => {
         const query = searchQuery.toLowerCase().trim();
         if (!query) return contacts;
@@ -77,6 +85,7 @@ const ContactsTable = ({
         });
     }, [contacts, searchQuery]);
 
+    // Handle the contact deletion logic with confirmation
     const handleDelete = useCallback(async (id) => {
         if (window.confirm('Are you sure you want to delete this contact?')) {
             try {
@@ -88,9 +97,10 @@ const ContactsTable = ({
         }
     }, [onDelete, showSnackbar]);
 
+    // Handle the edit form submission (update contact)
     const handleSubmitEdit = useCallback(async (data) => {
         try {
-            await onUpdate(editContact._id, data);
+            await onUpdate(editContact._id, data); // Call update API with contact data
             handleCloseEdit();
             showSnackbar('Contact updated successfully!');
         } catch (error) {
@@ -99,9 +109,10 @@ const ContactsTable = ({
         }
     }, [editContact, onUpdate, handleCloseEdit, showSnackbar]);
 
+    // Handle the add form submission (add new contact)
     const handleSubmitAdd = useCallback(async (data) => {
         try {
-            await onAdd(data);
+            await onAdd(data); // Call add API with new contact data
             onAddDialogClose();
             showSnackbar('Contact added successfully!');
         } catch (error) {
@@ -110,6 +121,7 @@ const ContactsTable = ({
         }
     }, [onAdd, onAddDialogClose, showSnackbar]);
 
+    // If contacts are loading, show a loading spinner
     if (loading) {
         return (
             <Typography align="center">
@@ -119,6 +131,7 @@ const ContactsTable = ({
         );
     }
 
+    // If an error occurs while loading contacts, show an error message
     if (error) {
         return (
             <Typography color="error" align="center">
@@ -129,6 +142,7 @@ const ContactsTable = ({
 
     return (
         <>
+            {/* Search Bar for filtering contacts */}
             <Paper sx={{ mb: 2, p: 2 }}>
                 <TextField
                     fullWidth
@@ -146,6 +160,7 @@ const ContactsTable = ({
                 />
             </Paper>
 
+            {/* Table for displaying contacts */}
             <TableContainer>
                 <Table>
                     <TableHead>
@@ -171,6 +186,7 @@ const ContactsTable = ({
                                     <TableCell>{contact.company}</TableCell>
                                     <TableCell>{contact.jobTitle}</TableCell>
                                     <TableCell>
+                                        {/* Edit and Delete Icons */}
                                         <IconButton onClick={() => handleEditClick(contact)} color="primary">
                                             <Edit />
                                         </IconButton>
@@ -180,6 +196,7 @@ const ContactsTable = ({
                                     </TableCell>
                                 </TableRow>
                             ))}
+                        {/* If no contacts match the search filter */}
                         {filteredContacts.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={7} align="center">
@@ -189,6 +206,7 @@ const ContactsTable = ({
                         )}
                     </TableBody>
                 </Table>
+                {/* Pagination Controls */}
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
@@ -200,6 +218,7 @@ const ContactsTable = ({
                 />
             </TableContainer>
 
+            {/* Edit Contact Form Dialog */}
             <ContactForm
                 isOpen={!!editContact}
                 onClose={handleCloseEdit}
@@ -208,6 +227,7 @@ const ContactsTable = ({
                 title="Edit Contact"
             />
 
+            {/* Add New Contact Form Dialog */}
             <ContactForm
                 isOpen={isAddDialogOpen}
                 onClose={onAddDialogClose}
@@ -215,6 +235,7 @@ const ContactsTable = ({
                 title="Add Contact"
             />
 
+            {/* Snackbar for success/error messages */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
